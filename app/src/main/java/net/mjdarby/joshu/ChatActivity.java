@@ -6,30 +6,45 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+
 public class ChatActivity extends ListActivity implements AsyncAware {
     private ChatMessageAdapter adapter;
 
     public void sendMessage(View v) {
-        Button myButton = (Button) findViewById(R.id.chatSend);
+        Button myButton = findViewById(R.id.chatSend);
         myButton.setEnabled(false);
-        EditText myEditText = (EditText) findViewById(R.id.chatText);
+        EditText myEditText = findViewById(R.id.chatText);
         myEditText.setEnabled(false);
         CallServerTask myCallServerTask = new CallServerTask();
         myCallServerTask.delegate = this;
         adapter.add(new ChatMessage(myEditText.getText().toString(), false));
-        myCallServerTask.execute(myEditText.getText().toString());
+        myCallServerTask.execute("chat " + myEditText.getText().toString());
         myEditText.setText("");
     }
 
     @Override
     public void processFinish(String output){
+        // Get only the text response
+        String myResponseText;
+        try {
+            ObjectMapper myMapper = new ObjectMapper();
+            ServerResponse myResponse = myMapper.readValue(output, ServerResponse.class);
+            myResponseText = myResponse.getText();
+        }
+        catch (IOException e) {
+            myResponseText = "I'm not feeling great";
+        }
+
         // Print output
-        adapter.add(new ChatMessage(output, true));
+        adapter.add(new ChatMessage(myResponseText, true));
 
         // Unlock send button
-        EditText myEditText = (EditText) findViewById(R.id.chatText);
+        EditText myEditText = findViewById(R.id.chatText);
         myEditText.setEnabled(true);
-        Button myButton = (Button) findViewById(R.id.chatSend);
+        Button myButton = findViewById(R.id.chatSend);
         myButton.setEnabled(true);
     }
 
@@ -38,15 +53,10 @@ public class ChatActivity extends ListActivity implements AsyncAware {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        ChatMessage[] myList = new ChatMessage[] {new ChatMessage("hello", true),
-                                                  new ChatMessage("world", false)};
-
         adapter = new ChatMessageAdapter(
                 this,
                 R.layout.chat_row
         );
-        adapter.add(myList[0]);
-        adapter.add(myList[1]);
         setListAdapter(adapter);
     }
 }

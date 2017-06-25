@@ -9,12 +9,20 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class MainActivity extends AppCompatActivity {
+import java.io.IOException;
+
+
+public class MainActivity extends AppCompatActivity implements AsyncAware {
 
     public void startChat(View v) {
-        Intent intent = new Intent(this, ChatActivity.class);
-        startActivity(intent);
+        Button myButton = (Button) findViewById(R.id.startButton);
+        myButton.setEnabled(false);
+
+        CallServerTask myCallServerTask = new CallServerTask();
+        myCallServerTask.delegate = this;
+        myCallServerTask.execute("connect phone");
     }
 
     @Override
@@ -23,5 +31,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Log.d("SERVER", "LET'S GO!");
+    }
+
+    @Override
+    public void processFinish(String output){
+        Intent intent = new Intent(this, ChatActivity.class);
+        startActivity(intent);
     }
 }
