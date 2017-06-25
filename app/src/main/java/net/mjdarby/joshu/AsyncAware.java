@@ -1,5 +1,5 @@
 package net.mjdarby.joshu;
 
-public interface AsyncAware {
+interface AsyncAware {
     void processFinish(String output);
 }

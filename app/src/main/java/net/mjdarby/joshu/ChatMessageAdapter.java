@@ -1,6 +1,7 @@
 package net.mjdarby.joshu;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,12 +13,12 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatMessageAdapter extends ArrayAdapter<ChatMessage> {
+class ChatMessageAdapter extends ArrayAdapter<ChatMessage> {
     private TextView message;
-    private List<ChatMessage> messages = new ArrayList<ChatMessage>();
+    private List<ChatMessage> messages = new ArrayList<>();
     private LinearLayout wrapper;
 
-    public ChatMessageAdapter(Context context, int textViewResourceId) {
+    ChatMessageAdapter(Context context, int textViewResourceId) {
         super(context, textViewResourceId);
     }
 
@@ -35,7 +36,8 @@ public class ChatMessageAdapter extends ArrayAdapter<ChatMessage> {
         return this.messages.get(index);
     }
 
-    public View getView(int position, View ConvertView, ViewGroup parent){
+    @NonNull
+    public View getView(int position, View ConvertView, @NonNull ViewGroup parent){
         View v = ConvertView;
         if(v==null){
             LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -44,10 +46,13 @@ public class ChatMessageAdapter extends ArrayAdapter<ChatMessage> {
 
         wrapper = v.findViewById(R.id.wrapper);
         ChatMessage myChatMessage = getItem(position);
-        message =(TextView)v.findViewById(R.id.text);
+        if (myChatMessage == null) {
+            myChatMessage = new ChatMessage("INVALID CHAT MESSAGE", true);
+        }
+        message = v.findViewById(R.id.text);
         message.setText(myChatMessage.mString);
         message.setBackgroundResource(myChatMessage.mLeft ? R.drawable.bubble :R.drawable.bubble_r);
-        wrapper.setGravity(myChatMessage.mLeft? Gravity.LEFT:Gravity.RIGHT);
+        wrapper.setGravity(myChatMessage.mLeft? Gravity.START:Gravity.END);
         return v;
     }
 }
